@@ -2,25 +2,47 @@
   <div class="min-h-screen app-shell lg:flex">
     <aside class="w-full lg:w-64 bg-[#f4f5f3] border-r border-[#e1e3de]">
       <div class="px-6 py-7 border-b border-[#e1e3de]">
-        <p class="text-[#2f6b67] font-semibold tracking-wide">Ethos</p>
-        <p class="text-[11px] uppercase tracking-[0.24em] text-[#8d9691]">Forensic Recovery</p>
+        <p class="text-[#2f6b67] font-semibold tracking-wide">ETHOS</p>
+        <p class="text-[11px] uppercase tracking-[0.24em] text-[#8d9691]">Device Management System</p>
       </div>
 
       <nav class="p-4 space-y-1 text-sm">
-        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition">Overview</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg bg-white text-[#2f6b67] font-medium border border-[#dde5df] shadow-sm">Asset Inventory</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition">Recovery Ops</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition">Audit Logs</button>
+        <button
+          class="w-full text-left px-4 py-2.5 rounded-lg transition"
+          :class="currentView === 'overview'
+            ? 'bg-white text-[#2f6b67] font-medium border border-[#dde5df] shadow-sm'
+            : 'text-[#5d6662] hover:bg-white'"
+          @click="currentView = 'overview'"
+        >
+          Overview
+        </button>
+        <button
+          class="w-full text-left px-4 py-2.5 rounded-lg transition"
+          :class="currentView === 'inventory'
+            ? 'bg-white text-[#2f6b67] font-medium border border-[#dde5df] shadow-sm'
+            : 'text-[#5d6662] hover:bg-white'"
+          @click="currentView = 'inventory'"
+        >
+          Asset Inventory
+        </button>
+        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition opacity-50 cursor-not-allowed">Recovery Ops (coming soon)</button>
+        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition opacity-50 cursor-not-allowed">Audit Logs (coming soon)</button>
       </nav>
 
       <div class="hidden lg:block mt-auto p-4 text-sm text-[#5d6662] space-y-1">
-        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition">Support</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition">Sign Out</button>
+        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition opacity-50 cursor-not-allowed">Support (coming soon)</button>
+        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition opacity-50 cursor-not-allowed">Sign Out (coming soon)</button>
       </div>
     </aside>
 
     <main class="flex-1 p-4 md:p-8">
-      <section class="max-w-6xl mx-auto">
+      <OverviewSection
+        v-if="currentView === 'overview'"
+        :devices="devices"
+        :error="error"
+      />
+
+      <section v-else class="max-w-6xl mx-auto">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7">
           <div>
             <p class="text-xs uppercase tracking-[0.16em] text-[#8c9590] mb-2">Forensics / Asset Management</p>
@@ -98,6 +120,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import DeviceList from './components/DeviceList.vue';
+import OverviewSection from './components/OverviewSection.vue';
 import { useDevices } from './composables/useDevices';
 import type { Device } from './types/device';
 
@@ -106,6 +129,7 @@ type SecurityFilter = SecurityTier | 'all';
 type SortMode = 'risk' | 'recent' | 'name';
 
 const { devices, error } = useDevices();
+const currentView = ref<'overview' | 'inventory'>('overview');
 const searchQuery = ref('');
 const securityFilter = ref<SecurityFilter>('all');
 const sortBy = ref<SortMode>('risk');
