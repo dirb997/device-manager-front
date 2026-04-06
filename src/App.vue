@@ -25,13 +25,13 @@
         >
           Asset Inventory
         </button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition opacity-50 cursor-not-allowed">Recovery Ops (coming soon)</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] hover:bg-white transition opacity-50 cursor-not-allowed">Audit Logs (coming soon)</button>
+        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] transition opacity-50 cursor-not-allowed">Recovery Ops (coming soon)</button>
+        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] transition opacity-50 cursor-not-allowed">Audit Logs (coming soon)</button>
       </nav>
 
       <div class="hidden lg:block mt-auto p-4 text-sm text-[#5d6662] space-y-1">
-        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition opacity-50 cursor-not-allowed">Support (coming soon)</button>
-        <button class="w-full text-left px-4 py-2.5 rounded-lg hover:bg-white transition opacity-50 cursor-not-allowed">Sign Out (coming soon)</button>
+        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg transition opacity-50 cursor-not-allowed">Support (coming soon)</button>
+        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg transition opacity-50 cursor-not-allowed">Sign Out (coming soon)</button>
       </div>
     </aside>
 
