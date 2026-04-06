@@ -149,10 +149,13 @@ const healthScore = computed(() => {
 });
 
 const lastUpdateText = computed(() => {
-  const latest = [...props.devices].sort(
-    (a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime()
-  )[0];
-  if (!latest) return 'just now';
+  if (props.devices.length === 0) return 'just now';
+
+  const latest = props.devices.reduce((currentLatest, device) => {
+    return new Date(device.last_seen).getTime() > new Date(currentLatest.last_seen).getTime()
+      ? device
+      : currentLatest;
+  }, props.devices[0]);
   return `${formatDistanceToNowStrict(new Date(latest.last_seen))} ago`;
 });
 
