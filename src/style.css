@@ -1,3 +1,70 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	:root {
+		font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+		color: #1f2522;
+		background: radial-gradient(circle at top left, #f8faf8 0%, #f1f3f0 60%, #ecefeb 100%);
+	}
+
+	body {
+		@apply m-0;
+		min-height: 100vh;
+		background: inherit;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+}
+
+@layer components {
+	.app-shell {
+		background: linear-gradient(130deg, #f6f7f5 0%, #f0f2ee 45%, #ebeeea 100%);
+	}
+
+	.metric-card {
+		@apply rounded-2xl border p-4 md:p-5;
+		border-color: #dfe3de;
+		background: linear-gradient(180deg, #f8f9f7 0%, #f2f4f1 100%);
+	}
+
+	.metric-danger {
+		border-color: #ecd2cd;
+		background: linear-gradient(180deg, #f9f0ee 0%, #f6e8e5 100%);
+	}
+
+	.metric-label {
+		@apply text-[11px] uppercase tracking-[0.16em] text-[#919a95] mb-1;
+	}
+
+	.metric-value {
+		@apply text-3xl md:text-[2.1rem] font-semibold text-[#232a27];
+	}
+
+	.metric-subtag {
+		@apply inline-block mt-2 px-2 py-1 rounded-full text-[11px] font-semibold;
+		color: #3f7f76;
+		background: #d9eeea;
+	}
+
+	.toolbar-panel {
+		@apply rounded-2xl border p-3 md:p-4 flex flex-col xl:flex-row gap-3 xl:items-center;
+		border-color: #dfe3de;
+		background: #f2f4f1;
+	}
+
+	.toolbar-select {
+		@apply rounded-xl border bg-white px-3 py-3 text-sm text-[#47534d] focus:outline-none focus:ring-2;
+		border-color: #d7dbd6;
+		min-width: 170px;
+		--tw-ring-color: #7ea7a266;
+	}
+
+	.meta-pill {
+		@apply px-2 py-1 rounded-md text-[#77807b];
+		background: #f2f4f1;
+	}
+}
