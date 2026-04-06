@@ -54,7 +54,9 @@
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-[1.55rem] leading-none font-semibold text-[#2c3330]">Critical Alerts</h3>
           <span class="inline-flex items-center rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider bg-[#f9d9d3] text-[#af4d44]">
-            {{ overviewAlerts.length }} active
+            {{ overviewAlerts.length === 1 && overviewAlerts[0].title === 'No Critical Events'
+              ? 'Stable'
+              : `Showing ${overviewAlerts.length}` }}
           </span>
         </div>
 
