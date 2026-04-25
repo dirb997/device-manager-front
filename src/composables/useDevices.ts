@@ -1,9 +1,14 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import type { Device, BatteryUpdate } from '../types/device';
+import { API_BASE_URL, TOKEN_STORAGE_KEY, WS_URL } from '../config/env';
 
-const API_URL = 'http://localhost:8000/api';
-const WS_URL = 'ws://localhost:8000/api/ws';
+const API_URL = API_BASE_URL;
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export function useDevices() {
   const devices = ref<Device[]>([]);
@@ -21,11 +26,17 @@ export function useDevices() {
   );
 
   const fetchDevices = async () => {
+    const headers = getAuthHeaders();
+    if (!headers.Authorization) {
+      isLoading.value = false;
+      return;
+    }
+
     try {
       isLoading.value = true;
       // Best-effort local scan (e.g., ADB) before fetching current DB state.
-      await axios.post(`${API_URL}/devices/scan`).catch(() => undefined);
-      const response = await axios.get<Device[]>(`${API_URL}/devices`);
+      await axios.post(`${API_URL}/devices/scan`, {}, { headers }).catch(() => undefined);
+      const response = await axios.get<Device[]>(`${API_URL}/devices`, { headers });
       devices.value = response.data;
     } catch (err) {
       error.value = 'Failed to fetch devices';
@@ -36,7 +47,12 @@ export function useDevices() {
   };
 
   const connectWebSocket = () => {
-    const websocket = new WebSocket(WS_URL);
+    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!token) {
+      return;
+    }
+
+    const websocket = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
     
     websocket.onopen = () => {
       console.log('Connected to Device Manager');
@@ -99,7 +115,7 @@ export function useDevices() {
 
   const disconnectDevice = async (deviceId: string) => {
     try {
-      await axios.post(`${API_URL}/devices/${deviceId}/disconnect`);
+      await axios.post(`${API_URL}/devices/${deviceId}/disconnect`, {}, { headers: getAuthHeaders() });
     } catch (err) {
       console.error('Failed to disconnect device:', err);
     }

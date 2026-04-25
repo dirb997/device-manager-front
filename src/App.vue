@@ -1,5 +1,13 @@
 <template>
-  <div class="min-h-screen app-shell lg:flex">
+  <LoginPage
+    v-if="!isAuthenticated"
+    :loading="isAuthenticating"
+    :error="authError"
+    @login="handleLogin"
+    @register="handleRegister"
+  />
+
+  <div v-else class="min-h-screen app-shell lg:flex">
     <aside class="w-full lg:w-64 bg-[#f4f5f3] border-r border-[#e1e3de]">
       <div class="px-6 py-7 border-b border-[#e1e3de]">
         <p class="text-[#2f6b67] font-semibold tracking-wide">ETHOS</p>
@@ -25,14 +33,13 @@
         >
           Asset Inventory
         </button>
-        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] transition opacity-50 cursor-not-allowed">Recovery Ops (coming soon)</button>
-        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg text-[#5d6662] transition opacity-50 cursor-not-allowed">Audit Logs (coming soon)</button>
+        <button
+          class="w-full text-left px-4 py-2.5 rounded-lg transition text-[#5d6662] hover:bg-white"
+          @click="handleLogout"
+        >
+          Sign Out
+        </button>
       </nav>
-
-      <div class="hidden lg:block mt-auto p-4 text-sm text-[#5d6662] space-y-1">
-        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg transition opacity-50 cursor-not-allowed">Support (coming soon)</button>
-        <button disabled aria-disabled="true" class="w-full text-left px-4 py-2.5 rounded-lg transition opacity-50 cursor-not-allowed">Sign Out (coming soon)</button>
-      </div>
     </aside>
 
     <main class="flex-1 p-4 md:p-8">
@@ -119,8 +126,11 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import axios from 'axios';
 import DeviceList from './components/DeviceList.vue';
+import LoginPage from './components/LoginPage.vue';
 import OverviewSection from './components/OverviewSection.vue';
+import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './config/env';
 import { useDevices } from './composables/useDevices';
 import type { Device } from './types/device';
 
@@ -130,11 +140,90 @@ type SortMode = 'risk' | 'recent' | 'name';
 
 const { devices, error } = useDevices();
 const currentView = ref<'overview' | 'inventory'>('overview');
+const isAuthenticated = ref(Boolean(localStorage.getItem(TOKEN_STORAGE_KEY)));
+const isAuthenticating = ref(false);
+const authError = ref('');
 const searchQuery = ref('');
 const securityFilter = ref<SecurityFilter>('all');
 const sortBy = ref<SortMode>('risk');
 const page = ref(1);
 const pageSize = 4;
+
+const handleLogin = async (credentials: { email: string; password: string }) => {
+  authError.value = '';
+
+  if (!credentials.email || !credentials.password) {
+    authError.value = 'Please enter both email and password.';
+    return;
+  }
+
+  isAuthenticating.value = true;
+
+  try {
+    const response = await axios.post(`${AUTH_API_URL}/login`, credentials);
+    localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
+    isAuthenticated.value = true;
+    currentView.value = 'overview';
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      authError.value = (err.response?.data?.detail as string) || 'Login failed.';
+    } else {
+      authError.value = 'Login failed.';
+    }
+  } finally {
+    isAuthenticating.value = false;
+  }
+};
+
+const handleRegister = async (credentials: { email: string; password: string; confirmPassword: string }) => {
+  authError.value = '';
+
+  if (!credentials.email || !credentials.password || !credentials.confirmPassword) {
+    authError.value = 'Please complete all fields.';
+    return;
+  }
+
+  if (credentials.password !== credentials.confirmPassword) {
+    authError.value = 'Passwords do not match.';
+    return;
+  }
+
+  isAuthenticating.value = true;
+
+  try {
+    await axios.post(`${AUTH_API_URL}/register`, {
+      email: credentials.email,
+      password: credentials.password,
+    });
+    await handleLogin({ email: credentials.email, password: credentials.password });
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      authError.value = (err.response?.data?.detail as string) || 'Registration failed.';
+    } else {
+      authError.value = 'Registration failed.';
+    }
+  } finally {
+    isAuthenticating.value = false;
+  }
+};
+
+const handleLogout = () => {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (token) {
+    axios
+      .post(
+        `${AUTH_API_URL}/logout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .catch(() => undefined);
+  }
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  isAuthenticated.value = false;
+  authError.value = '';
+};
 
 const safetyRank = (device: Device) => {
   if (device.status === 'disconnected' && device.battery_level < 15) return 0;
