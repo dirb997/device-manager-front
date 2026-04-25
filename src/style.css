@@ -21,6 +21,13 @@
 }
 
 @layer components {
+	.login-shell {
+		background:
+			radial-gradient(circle at 18% 12%, rgba(121, 162, 152, 0.26) 0%, rgba(121, 162, 152, 0) 40%),
+			radial-gradient(circle at 86% 82%, rgba(201, 169, 137, 0.2) 0%, rgba(201, 169, 137, 0) 35%),
+			linear-gradient(140deg, #f9fbf8 0%, #f2f5f1 45%, #ecefea 100%);
+	}
+
 	.app-shell {
 		background: linear-gradient(130deg, #f6f7f5 0%, #f0f2ee 45%, #ebeeea 100%);
 	}
