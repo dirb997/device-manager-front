@@ -1,38 +1,57 @@
 <template>
-  <article class="bg-white border border-[#e4e7e2] rounded-2xl p-4 md:p-5 hover:shadow-sm transition-shadow">
-    <div class="grid lg:grid-cols-[1.4fr_1.4fr_1.2fr_0.9fr] gap-5 items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-b from-[#7f8e89] to-[#3a4341] flex items-center justify-center shadow-inner">
-          <Smartphone class="w-5 h-5 text-white" />
+  <article class="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex min-w-0 items-start gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+          <Smartphone class="h-5 w-5" />
         </div>
-        <div>
-          <h3 class="font-semibold text-[#1f2522]">{{ device.name }}</h3>
-          <p class="text-[11px] tracking-wide text-[#8f9792]">ID: {{ device.id }}</p>
+
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 class="truncate text-lg font-semibold text-slate-900">{{ device.name }}</h3>
+            <Badge :variant="statusBadgeVariant">{{ statusLabel }}</Badge>
+            <Badge variant="outline">{{ connectionLabel }}</Badge>
+          </div>
+
+          <p class="mt-1 text-sm text-slate-500">
+            IMEI {{ device.imei }}
+            <span class="mx-1 text-slate-300">•</span>
+            ID {{ device.id }}
+          </p>
+          <p class="mt-1 text-xs text-slate-500">Last seen {{ lastSeenText }}</p>
         </div>
       </div>
 
-      <div class="space-y-1 text-[12px]">
-        <p class="text-[#707873]"><span class="text-[#9aa29d]">IMEI:</span> {{ device.imei }}</p>
-        <p class="text-[#707873]"><span class="text-[#9aa29d]">MAC:</span> {{ macAddress }}</p>
-        <p class="text-[#707873]"><span class="text-[#9aa29d]">Serial:</span> {{ serial }}</p>
-      </div>
-
-      <div class="space-y-2">
-        <div class="flex items-center gap-2 text-xs">
-          <span class="meta-pill">Battery: {{ device.battery_level }}%</span>
-          <span class="meta-pill">{{ device.is_charging ? 'Charging' : 'Idle' }}</span>
+      <div class="flex flex-col gap-3 lg:min-w-[270px] lg:items-end">
+        <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+          <Badge variant="secondary">Battery {{ batteryText }}</Badge>
+          <Badge :variant="device.is_charging ? 'success' : 'outline'">
+            {{ device.is_charging ? 'Charging' : 'Idle' }}
+          </Badge>
         </div>
-        <p class="text-[11px] text-[#8f9792]">Last seen {{ lastSeenText }}</p>
-      </div>
 
-      <div class="flex flex-col items-start lg:items-end gap-2">
-        <StatusBadge :status="device.status" :battery-level="device.battery_level" />
-        <button
-          class="w-full lg:w-auto px-3 py-2 rounded-lg text-xs font-medium transition"
-          :class="actionButtonClass"
-        >
-          {{ actionText }}
-        </button>
+        <div class="flex w-full items-center gap-2 lg:justify-end">
+          <Button
+            v-if="device.status === 'connected'"
+            size="sm"
+            variant="outline"
+            :disabled="busy"
+            @click="$emit('disconnect', device.id)"
+          >
+            Disconnect
+          </Button>
+          <Badge v-else variant="secondary">Disconnected</Badge>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-500">
+        <span>{{ batteryText || 'No battery data' }}</span>
+        <span>{{ batteryLevel }}%</span>
+      </div>
+      <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+        <div :class="batteryBarClass" :style="{ width: `${batteryLevel}%` }" />
       </div>
     </div>
   </article>
@@ -42,40 +61,75 @@
 import { computed } from 'vue';
 import { Smartphone } from 'lucide-vue-next';
 import { formatDistanceToNow } from 'date-fns';
-import StatusBadge from './StatusBadge.vue';
+import Badge from './ui/Badge.vue';
+import Button from './ui/Button.vue';
 import type { Device } from '../types/device';
 
-const props = defineProps<{
-  device: Device
+const props = withDefaults(
+  defineProps<{
+    device: Device;
+    busy?: boolean;
+  }>(),
+  {
+    busy: false,
+  }
+);
+
+defineEmits<{
+  disconnect: [deviceId: string];
 }>();
 
-const serial = computed(() => {
-  return props.device.id.split('-').slice(0, 3).join('-').toUpperCase();
+const connectionLabel = computed(() => {
+  const labels: Record<Device['connection_type'], string> = {
+    usb: 'USB',
+    bluetooth: 'Bluetooth',
+    wifi: 'Wi-Fi',
+    manual: 'Manual',
+    other: 'Other',
+  };
+
+  return labels[props.device.connection_type] ?? 'Other';
 });
 
-const macAddress = computed(() => {
-  const normalized = props.device.imei.replace(/[^0-9A-Fa-f]/g, '').slice(0, 12).padEnd(12, '0');
-  return normalized.match(/.{1,2}/g)?.join(':').toUpperCase() ?? '00:00:00:00:00:00';
+const batteryLevel = computed(() => Math.max(0, Math.min(100, props.device.battery_level)));
+
+const batteryText = computed(() => {
+  if (props.device.battery_display) {
+    return props.device.battery_display;
+  }
+
+  return props.device.battery_level > 0 ? `${props.device.battery_level}%` : 'Unknown';
+});
+
+const statusLabel = computed(() => {
+  if (props.device.status === 'connected') {
+    return 'Connected';
+  }
+
+  return props.device.battery_level < 20 ? 'Needs attention' : 'Disconnected';
+});
+
+const statusBadgeVariant = computed(() => {
+  if (props.device.status === 'connected') {
+    return 'success' as const;
+  }
+
+  return props.device.battery_level < 20 ? 'danger' as const : 'warning' as const;
 });
 
 const lastSeenText = computed(() => {
   return formatDistanceToNow(new Date(props.device.last_seen)) + ' ago';
 });
 
-const actionText = computed(() => {
-  if (props.device.status === 'disconnected' && props.device.battery_level < 15) {
-    return 'Export Case File';
+const batteryBarClass = computed(() => {
+  if (batteryLevel.value < 20) {
+    return 'h-2 rounded-full bg-rose-500 transition-all';
   }
-  if (props.device.status === 'disconnected') {
-    return 'Report As Stolen';
-  }
-  return 'Mark For Recovery';
-});
 
-const actionButtonClass = computed(() => {
-  if (props.device.status === 'disconnected' && props.device.battery_level < 15) {
-    return 'bg-[#c96558] text-white hover:bg-[#b95a4f]';
+  if (batteryLevel.value < 50) {
+    return 'h-2 rounded-full bg-amber-500 transition-all';
   }
-  return 'bg-[#f3f5f2] text-[#55605b] hover:bg-[#e7ebe6]';
+
+  return 'h-2 rounded-full bg-emerald-500 transition-all';
 });
 </script>
