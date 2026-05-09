@@ -6,20 +6,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   status: 'connected' | 'disconnected';
   batteryLevel: number;
 }>();
 
+const { t } = useI18n();
+
 const label = computed(() => {
   if (props.status === 'disconnected' && props.batteryLevel < 15) {
-    return 'Stolen';
+    return t('statusBadge.stolen');
   }
   if (props.status === 'disconnected') {
-    return 'Warning';
+    return t('statusBadge.warning');
   }
-  return 'Encrypted';
+  return t('statusBadge.encrypted');
 });
 
 const colorClasses = computed(() => {

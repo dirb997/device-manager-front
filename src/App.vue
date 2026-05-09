@@ -15,24 +15,24 @@
             DM
           </div>
           <div class="min-w-0">
-            <p class="text-sm font-semibold text-slate-900">Device Manager</p>
-            <p class="text-xs text-slate-500">Simple device control</p>
+            <p class="text-sm font-semibold text-slate-900">{{ t('app.title') }}</p>
+            <p class="text-xs text-slate-500">{{ t('app.subtitle') }}</p>
           </div>
         </div>
 
         <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p class="text-xs uppercase tracking-[0.18em] text-slate-500">Signed in as</p>
+          <p class="text-xs uppercase tracking-[0.18em] text-slate-500">{{ t('app.signedInAs') }}</p>
           <p class="mt-2 truncate text-sm font-medium text-slate-900">
-            {{ currentUser?.email ?? 'Loading profile…' }}
+            {{ currentUser?.email ?? t('app.loadingProfile') }}
           </p>
         </div>
 
         <div class="mt-5 space-y-2">
           <Button class="w-full justify-start" :variant="currentView === 'overview' ? 'default' : 'outline'" @click="currentView = 'overview'">
-            Overview
+            {{ t('app.overviewNav') }}
           </Button>
           <Button class="w-full justify-start" :variant="currentView === 'devices' ? 'default' : 'outline'" @click="currentView = 'devices'">
-            Devices
+            {{ t('app.devicesNav') }}
           </Button>
         </div>
 
@@ -41,25 +41,25 @@
         <div class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">Total</p>
+              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">{{ t('app.total') }}</p>
               <p class="mt-2 text-2xl font-semibold text-slate-900">{{ stats.total }}</p>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">Connected</p>
+              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">{{ t('app.connected') }}</p>
               <p class="mt-2 text-2xl font-semibold text-slate-900">{{ stats.connected }}</p>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">Offline</p>
+              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">{{ t('app.offline') }}</p>
               <p class="mt-2 text-2xl font-semibold text-slate-900">{{ stats.disconnected }}</p>
             </div>
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">Low battery</p>
+              <p class="text-[11px] uppercase tracking-[0.16em] text-slate-500">{{ t('app.lowBattery') }}</p>
               <p class="mt-2 text-2xl font-semibold text-slate-900">{{ stats.lowBattery }}</p>
             </div>
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-            {{ statusMessage || 'Use scan to refresh local discovery, refresh to sync the registry, or add a device manually.' }}
+            {{ statusMessage || t('app.statusMessage') }}
           </div>
         </div>
 
@@ -67,30 +67,30 @@
 
         <div class="space-y-4">
           <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Quick add device</h3>
-            <p class="mt-1 text-sm text-slate-500">Create a manual record when local discovery is not available.</p>
+            <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">{{ t('app.quickAddTitle') }}</h3>
+            <p class="mt-1 text-sm text-slate-500">{{ t('app.quickAddCopy') }}</p>
           </div>
 
           <form class="space-y-3" @submit.prevent="handleCreateDevice">
-            <Input v-model="newDeviceName" placeholder="Device name" />
-            <Input v-model="newDeviceImei" placeholder="IMEI or serial" />
+            <Input v-model="newDeviceName" :placeholder="t('app.deviceName')" />
+            <Input v-model="newDeviceImei" :placeholder="t('app.imeiOrSerial')" />
 
             <Select v-model="newDeviceConnectionType">
-              <option value="manual">Manual</option>
-              <option value="usb">USB</option>
-              <option value="bluetooth">Bluetooth</option>
-              <option value="wifi">Wi-Fi</option>
-              <option value="other">Other</option>
+              <option value="manual">{{ t('deviceCard.manual') }}</option>
+              <option value="usb">{{ t('deviceCard.usb') }}</option>
+              <option value="bluetooth">{{ t('deviceCard.bluetooth') }}</option>
+              <option value="wifi">{{ t('deviceCard.wifi') }}</option>
+              <option value="other">{{ t('deviceCard.other') }}</option>
             </Select>
 
-            <Input v-model="newDeviceBatteryLevel" type="number" min="0" max="100" placeholder="Battery level" />
+            <Input v-model="newDeviceBatteryLevel" type="number" min="0" max="100" :placeholder="t('app.batteryLevel')" />
 
             <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
               <input v-model="newDeviceCharging" type="checkbox" class="h-4 w-4 rounded border-slate-300" />
-              Charging
+              {{ t('app.charging') }}
             </label>
 
-            <Button type="submit" class="w-full" :disabled="isSaving || isScanning">Add device</Button>
+            <Button type="submit" class="w-full" :disabled="isSaving || isScanning">{{ t('app.addDevice') }}</Button>
           </form>
         </div>
 
@@ -98,33 +98,33 @@
 
         <div class="space-y-2">
           <Button class="w-full" variant="outline" :disabled="isLoading || isScanning" @click="handleScan">
-            {{ isScanning ? 'Scanning…' : 'Scan local devices' }}
+            {{ isScanning ? t('app.scanning') : t('app.scanLocalDevices') }}
           </Button>
           <Button class="w-full" variant="outline" :disabled="isLoading || isScanning" @click="handleRefresh">
-            Refresh registry
+            {{ t('app.refreshRegistry') }}
           </Button>
-          <Button class="w-full" variant="ghost" @click="handleLogout">Sign out</Button>
+          <Button class="w-full" variant="ghost" @click="handleLogout">{{ t('app.signOut') }}</Button>
         </div>
       </aside>
 
       <main class="space-y-4">
         <div class="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Simple device operations</p>
+            <p class="text-xs uppercase tracking-[0.28em] text-slate-500">{{ t('app.shellTitle') }}</p>
             <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-              {{ currentView === 'overview' ? 'Overview' : 'Device registry' }}
+              {{ currentView === 'overview' ? t('app.currentViewOverviewTitle') : t('app.currentViewDevicesTitle') }}
             </h1>
             <p class="mt-1 text-sm text-slate-500">
-              {{ currentView === 'overview' ? 'A compact snapshot of fleet health and recent activity.' : 'Search and filter by connection type or status.' }}
+              {{ currentView === 'overview' ? t('app.currentViewOverviewCopy') : t('app.currentViewDevicesCopy') }}
             </p>
           </div>
 
           <div class="flex flex-wrap gap-2">
             <Button variant="outline" :disabled="isLoading || isScanning" @click="handleRefresh">
-              Refresh
+              {{ t('app.refresh') }}
             </Button>
             <Button :disabled="isLoading || isScanning" @click="handleScan">
-              Scan devices
+              {{ t('app.scanDevices') }}
             </Button>
           </div>
         </div>
@@ -141,34 +141,34 @@
           <div class="space-y-4">
             <Card class="p-5">
               <div class="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_180px_180px_180px]">
-                <Input v-model="searchQuery" placeholder="Search by name, IMEI, or ID" />
+                <Input v-model="searchQuery" :placeholder="t('app.searchPlaceholder')" />
 
                 <Select v-model="statusFilter">
-                  <option value="all">All statuses</option>
-                  <option value="connected">Connected</option>
-                  <option value="disconnected">Disconnected</option>
+                  <option value="all">{{ t('app.allStatuses') }}</option>
+                  <option value="connected">{{ t('app.connected') }}</option>
+                  <option value="disconnected">{{ t('app.offline') }}</option>
                 </Select>
 
                 <Select v-model="connectionFilter">
-                  <option value="all">All connections</option>
-                  <option value="usb">USB</option>
-                  <option value="bluetooth">Bluetooth</option>
-                  <option value="wifi">Wi-Fi</option>
-                  <option value="manual">Manual</option>
-                  <option value="other">Other</option>
+                  <option value="all">{{ t('app.allConnections') }}</option>
+                  <option value="usb">{{ t('deviceCard.usb') }}</option>
+                  <option value="bluetooth">{{ t('deviceCard.bluetooth') }}</option>
+                  <option value="wifi">{{ t('deviceCard.wifi') }}</option>
+                  <option value="manual">{{ t('deviceCard.manual') }}</option>
+                  <option value="other">{{ t('deviceCard.other') }}</option>
                 </Select>
 
                 <Select v-model="sortBy">
-                  <option value="recent">Sort by recent</option>
-                  <option value="name">Sort by name</option>
-                  <option value="battery">Sort by battery</option>
+                  <option value="recent">{{ t('app.sortRecent') }}</option>
+                  <option value="name">{{ t('app.sortName') }}</option>
+                  <option value="battery">{{ t('app.sortBattery') }}</option>
                 </Select>
               </div>
 
               <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-500">
-                <Badge variant="secondary">{{ filteredDevices.length }} filtered</Badge>
-                <Badge variant="outline">{{ connectedFilteredDevices.length }} connected</Badge>
-                <Badge variant="outline">{{ disconnectedFilteredDevices.length }} disconnected</Badge>
+                <Badge variant="secondary">{{ filteredDevices.length }} {{ t('app.filtered') }}</Badge>
+                <Badge variant="outline">{{ connectedFilteredDevices.length }} {{ t('app.connectedCount') }}</Badge>
+                <Badge variant="outline">{{ disconnectedFilteredDevices.length }} {{ t('app.disconnectedCount') }}</Badge>
               </div>
             </Card>
 
@@ -183,21 +183,21 @@
           <Card class="p-5">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <h3 class="text-lg font-semibold tracking-tight text-slate-900">Registry notes</h3>
-                <p class="mt-1 text-sm text-slate-500">Use this panel for lightweight operational actions.</p>
+                <h3 class="text-lg font-semibold tracking-tight text-slate-900">{{ t('app.registryNotesTitle') }}</h3>
+                <p class="mt-1 text-sm text-slate-500">{{ t('app.registryNotesCopy') }}</p>
               </div>
-              <Badge variant="secondary">Live</Badge>
+              <Badge variant="secondary">{{ t('app.liveAndAvailable') }}</Badge>
             </div>
 
             <div class="mt-5 space-y-3 text-sm text-slate-600">
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                The list is grouped by connection and status so the important items stay visible.
+                {{ t('app.registryNoteOne') }}
               </div>
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                Disconnect is the only destructive per-device action exposed by the backend.
+                {{ t('app.registryNoteTwo') }}
               </div>
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                Manual add is available when a device cannot be discovered locally.
+                {{ t('app.registryNoteThree') }}
               </div>
             </div>
           </Card>
@@ -212,6 +212,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import axios from 'axios';
+import { useI18n } from 'vue-i18n';
 import Badge from './components/ui/Badge.vue';
 import Button from './components/ui/Button.vue';
 import Card from './components/ui/Card.vue';
@@ -223,6 +224,7 @@ import LoginPage from './components/LoginPage.vue';
 import OverviewSection from './components/OverviewSection.vue';
 import { AUTH_API_URL, TOKEN_STORAGE_KEY } from './config/env';
 import { useDevices } from './composables/useDevices';
+import { getStoredLocale, setLocale, type LocaleCode } from './i18n';
 import type { DeviceCreate, UserPublic } from './types/device';
 
 type StatusFilter = 'all' | 'connected' | 'disconnected';
@@ -243,6 +245,8 @@ const {
   initializeDevices,
   shutdownRealtime,
 } = useDevices();
+
+const { t } = useI18n();
 
 const currentView = ref<'overview' | 'devices'>('overview');
 const isAuthenticated = ref(Boolean(localStorage.getItem(TOKEN_STORAGE_KEY)));
@@ -322,7 +326,7 @@ const handleLogin = async (credentials: { email: string; password: string }) => 
   authError.value = '';
 
   if (!credentials.email || !credentials.password) {
-    authError.value = 'Please enter both email and password.';
+    authError.value = t('auth.completeAllFields');
     return;
   }
 
@@ -332,47 +336,50 @@ const handleLogin = async (credentials: { email: string; password: string }) => 
     const response = await axios.post(`${AUTH_API_URL}/login`, credentials);
     localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access_token);
     currentUser.value = response.data.user;
+    setLocale(currentUser.value?.language ?? getStoredLocale());
     isAuthenticated.value = true;
     currentView.value = 'overview';
-    statusMessage.value = 'Signed in successfully.';
+    statusMessage.value = t('auth.signingInSuccessfully');
     await initializeDevices();
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      authError.value = (err.response?.data?.detail as string) || 'Login failed.';
+      authError.value = (err.response?.data?.detail as string) || t('auth.loginFailed');
     } else {
-      authError.value = 'Login failed.';
+      authError.value = t('auth.loginFailed');
     }
   } finally {
     isAuthenticating.value = false;
   }
 };
 
-const handleRegister = async (credentials: { email: string; password: string; confirmPassword: string }) => {
+const handleRegister = async (credentials: { email: string; password: string; confirmPassword: string; language: LocaleCode }) => {
   authError.value = '';
 
   if (!credentials.email || !credentials.password || !credentials.confirmPassword) {
-    authError.value = 'Please complete all fields.';
+    authError.value = t('auth.completeAllFields');
     return;
   }
 
   if (credentials.password !== credentials.confirmPassword) {
-    authError.value = 'Passwords do not match.';
+    authError.value = t('auth.passwordsDoNotMatch');
     return;
   }
 
   isAuthenticating.value = true;
 
   try {
+    setLocale(credentials.language);
     await axios.post(`${AUTH_API_URL}/register`, {
       email: credentials.email,
       password: credentials.password,
+      language: credentials.language,
     });
     await handleLogin({ email: credentials.email, password: credentials.password });
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      authError.value = (err.response?.data?.detail as string) || 'Registration failed.';
+      authError.value = (err.response?.data?.detail as string) || t('auth.registrationFailed');
     } else {
-      authError.value = 'Registration failed.';
+      authError.value = t('auth.registrationFailed');
     }
   } finally {
     isAuthenticating.value = false;
@@ -406,6 +413,7 @@ const loadCurrentUser = async () => {
   try {
     const response = await axios.get<UserPublic>(`${AUTH_API_URL}/me`, { headers: authHeaders() });
     currentUser.value = response.data;
+    setLocale(currentUser.value?.language ?? getStoredLocale());
     return true;
   } catch {
     await handleLogout(true);
@@ -415,20 +423,20 @@ const loadCurrentUser = async () => {
 
 const handleRefresh = async () => {
   await fetchDevices();
-  statusMessage.value = 'Registry refreshed.';
+  statusMessage.value = t('app.registryRefreshed');
 };
 
 const handleScan = async () => {
   await scanDevices();
-  statusMessage.value = 'Local scan complete.';
+  statusMessage.value = t('app.localScanComplete');
 };
 
 const handleDisconnect = async (deviceId: string) => {
   try {
     await disconnectDevice(deviceId);
-    statusMessage.value = 'Device disconnected.';
+    statusMessage.value = t('app.deviceDisconnected');
   } catch {
-    statusMessage.value = 'Unable to disconnect the device right now.';
+    statusMessage.value = t('app.unableToDisconnectDevice');
   }
 };
 
@@ -437,7 +445,7 @@ const handleCreateDevice = async () => {
   const imei = newDeviceImei.value.trim();
 
   if (!name || !imei) {
-    statusMessage.value = 'Name and IMEI are required for a manual device.';
+    statusMessage.value = t('app.manualDeviceRequiresNameAndImei');
     return;
   }
 
@@ -457,9 +465,9 @@ const handleCreateDevice = async () => {
     newDeviceConnectionType.value = 'manual';
     newDeviceBatteryLevel.value = '100';
     newDeviceCharging.value = false;
-    statusMessage.value = 'Device added to the registry.';
+    statusMessage.value = t('app.deviceAddedToRegistry');
   } catch {
-    statusMessage.value = 'Unable to add the device right now.';
+    statusMessage.value = t('app.unableToAddDevice');
   }
 };
 

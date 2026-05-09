@@ -1,0 +1,17 @@
+export const deviceCard = {
+  lastSeen: 'Last seen',
+  battery: 'Battery',
+  charging: 'Charging',
+  idle: 'Idle',
+  disconnect: 'Disconnect',
+  disconnected: 'Disconnected',
+  noBatteryData: 'No battery data',
+  unknown: 'Unknown',
+  connected: 'Connected',
+  needsAttention: 'Needs attention',
+  usb: 'USB',
+  bluetooth: 'Bluetooth',
+  wifi: 'Wi-Fi',
+  manual: 'Manual',
+  other: 'Other',
+} as const;

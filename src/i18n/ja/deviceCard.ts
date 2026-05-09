@@ -1,0 +1,17 @@
+export const deviceCard = {
+  lastSeen: '最終確認',
+  battery: 'バッテリー',
+  charging: '充電中',
+  idle: 'アイドル',
+  disconnect: '切断',
+  disconnected: '切断済み',
+  noBatteryData: 'バッテリー情報なし',
+  unknown: '不明',
+  connected: '接続中',
+  needsAttention: '要確認',
+  usb: 'USB',
+  bluetooth: 'Bluetooth',
+  wifi: 'Wi-Fi',
+  manual: '手動',
+  other: 'その他',
+} as const;
