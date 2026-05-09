@@ -4,15 +4,15 @@
       <div class="bg-slate-950 px-6 py-6 text-white">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p class="text-xs uppercase tracking-[0.28em] text-slate-300">Operational overview</p>
-            <h2 class="mt-2 text-3xl font-semibold tracking-tight">Device fleet health at a glance</h2>
+            <p class="text-xs uppercase tracking-[0.28em] text-slate-300">{{ t('app.operationalOverview') }}</p>
+            <h2 class="mt-2 text-3xl font-semibold tracking-tight">{{ t('app.fleetHealthTitle') }}</h2>
             <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Monitor connected devices, surface low battery devices quickly, and keep the registry synchronized with live scan updates.
+              {{ t('app.fleetHealthCopy') }}
             </p>
           </div>
 
           <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-right backdrop-blur">
-            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-300">Last sync</p>
+            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-300">{{ t('app.lastSync') }}</p>
             <p class="mt-1 text-sm font-medium text-white">{{ lastSyncText }}</p>
           </div>
         </div>
@@ -31,10 +31,10 @@
       <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between gap-3">
           <div>
-            <h3 class="text-xl font-semibold tracking-tight text-slate-900">Health breakdown</h3>
-            <p class="mt-1 text-sm text-slate-500">A compact view of where the fleet needs attention.</p>
+            <h3 class="text-xl font-semibold tracking-tight text-slate-900">{{ t('app.healthBreakdownTitle') }}</h3>
+            <p class="mt-1 text-sm text-slate-500">{{ t('app.healthBreakdownCopy') }}</p>
           </div>
-          <Badge variant="secondary">Score {{ healthScore }}</Badge>
+          <Badge variant="secondary">{{ t('app.score') }} {{ healthScore }}</Badge>
         </div>
 
         <div class="mt-6 space-y-4">
@@ -60,8 +60,8 @@
       <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex items-center justify-between gap-3">
           <div>
-            <h3 class="text-xl font-semibold tracking-tight text-slate-900">Recent activity</h3>
-            <p class="mt-1 text-sm text-slate-500">Most recently seen devices from the registry.</p>
+            <h3 class="text-xl font-semibold tracking-tight text-slate-900">{{ t('app.recentActivityTitle') }}</h3>
+            <p class="mt-1 text-sm text-slate-500">{{ t('app.recentActivityCopy') }}</p>
           </div>
           <Badge variant="outline">{{ recentDevices.length }}</Badge>
         </div>
@@ -78,14 +78,14 @@
                 <p class="mt-1 text-sm text-slate-500">{{ device.imei }}</p>
               </div>
               <Badge :variant="device.status === 'connected' ? 'success' : 'warning'">
-                {{ device.status }}
+                {{ device.status === 'connected' ? t('app.connected') : t('app.offline') }}
               </Badge>
             </div>
             <p class="mt-3 text-xs text-slate-500">{{ formatSeen(device.last_seen) }}</p>
           </div>
 
           <div v-if="recentDevices.length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-            No device activity yet.
+            {{ t('app.noActivityYet') }}
           </div>
         </div>
       </div>
@@ -97,9 +97,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import { useI18n } from 'vue-i18n';
 import Badge from './ui/Badge.vue';
 import type { Device } from '../types/device';
+import { getDateFnsLocale } from '../i18n';
 
 const props = defineProps<{
   devices: Device[];
@@ -107,6 +109,8 @@ const props = defineProps<{
   isRefreshing: boolean;
   error: string | null;
 }>();
+
+const { t, locale } = useI18n();
 
 const totalDevices = computed(() => props.devices.length);
 
@@ -129,27 +133,42 @@ const healthScore = computed(() => {
 });
 
 const lastSyncText = computed(() => {
+  void locale.value;
+
   if (!props.lastSyncedAt) {
-    return props.isRefreshing ? 'syncing now' : 'waiting for first sync';
+    return props.isRefreshing ? t('app.syncingNow') : t('app.waitingForFirstSync');
   }
 
-  return `${formatDistanceToNowStrict(new Date(props.lastSyncedAt))} ago`;
+  return formatDistanceToNow(new Date(props.lastSyncedAt), {
+    addSuffix: true,
+    locale: getDateFnsLocale(locale.value),
+  });
 });
 
-const metrics = computed(() => [
-  { label: 'Total devices', value: totalDevices.value, helper: 'Records in the registry' },
-  { label: 'Connected', value: connectedCount.value, helper: 'Live and available now' },
-  { label: 'Disconnected', value: disconnectedCount.value, helper: 'Kept for history' },
-  { label: 'Low battery', value: lowBatteryCount.value, helper: 'Below 20%' },
-]);
+const metrics = computed(() => {
+  void locale.value;
 
-const overviewBars = computed(() => [
-  { label: 'Connected coverage', value: props.devices.length === 0 ? 100 : Math.round((connectedCount.value / props.devices.length) * 100) },
-  { label: 'Average battery', value: Math.round(averageBattery.value) },
-  { label: 'Healthy devices', value: props.devices.length === 0 ? 100 : Math.round(((props.devices.length - lowBatteryCount.value) / props.devices.length) * 100) },
-]);
+  return [
+    { label: t('app.totalDevicesMetric'), value: totalDevices.value, helper: t('app.recordsInRegistry') },
+    { label: t('app.connectedMetric'), value: connectedCount.value, helper: t('app.liveAndAvailable') },
+    { label: t('app.disconnectedMetric'), value: disconnectedCount.value, helper: t('app.keptForHistory') },
+    { label: t('app.lowBatteryMetric'), value: lowBatteryCount.value, helper: t('app.belowTwenty') },
+  ];
+});
+
+const overviewBars = computed(() => {
+  void locale.value;
+
+  return [
+    { label: t('app.connectedCoverage'), value: props.devices.length === 0 ? 100 : Math.round((connectedCount.value / props.devices.length) * 100) },
+    { label: t('app.averageBattery'), value: Math.round(averageBattery.value) },
+    { label: t('app.healthyDevices'), value: props.devices.length === 0 ? 100 : Math.round(((props.devices.length - lowBatteryCount.value) / props.devices.length) * 100) },
+  ];
+});
 
 const connectionSummary = computed(() => {
+  void locale.value;
+
   const counts = {
     usb: 0,
     bluetooth: 0,
@@ -163,10 +182,10 @@ const connectionSummary = computed(() => {
   });
 
   return [
-    { label: 'USB', count: counts.usb },
-    { label: 'Bluetooth', count: counts.bluetooth },
-    { label: 'Wi-Fi', count: counts.wifi },
-    { label: 'Manual', count: counts.manual + counts.other },
+    { label: t('deviceCard.usb'), count: counts.usb },
+    { label: t('deviceCard.bluetooth'), count: counts.bluetooth },
+    { label: t('deviceCard.wifi'), count: counts.wifi },
+    { label: t('deviceCard.manual'), count: counts.manual + counts.other },
   ];
 });
 
@@ -176,5 +195,8 @@ const recentDevices = computed(() =>
     .slice(0, 4)
 );
 
-const formatSeen = (value: string) => `${formatDistanceToNowStrict(new Date(value))} ago`;
+const formatSeen = (value: string) => formatDistanceToNow(new Date(value), {
+  addSuffix: true,
+  locale: getDateFnsLocale(locale.value),
+});
 </script>

@@ -1,3 +1,5 @@
+import type { LocaleCode } from '../i18n';
+
 export interface Device {
   id: string;
   name: string;
@@ -30,6 +32,7 @@ export interface BatteryUpdate {
 export interface UserPublic {
   id: string;
   email: string;
+  language: LocaleCode;
   created_at: string;
   updated_at: string;
 }
